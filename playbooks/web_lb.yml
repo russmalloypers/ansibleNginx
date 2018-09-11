@@ -1,0 +1,82 @@
+---
+#
+- hosts: webservers
+  sudo: yes
+
+  tasks:
+  - name: Ensure Apache is installed
+    yum: name=httpd state=present
+  
+#
+- hosts: web01
+  sudo: yes
+
+  tasks:
+  - name: push index.html file for web01
+    copy:
+      src: web01/index.html
+      dest: /var/www/html/index.html
+      owner: apache
+      group: apache
+      mode: 0644
+#
+- hosts: web02
+  sudo: yes
+
+  tasks:
+  - name: push index.html file for web02
+    copy:
+      src: web02/index.html
+      dest: /var/www/html/index.html
+      owner: apache
+      group: apache
+      mode: 0644
+
+#
+- hosts: webservers
+  sudo: yes
+
+  tasks:
+  - name: Start Apache services
+    service: name=httpd enabled=yes state=started
+
+
+
+
+#
+- hosts: lbservers
+  sudo: yes
+
+  tasks:
+  - name: push nginx repo
+    copy:
+      src: nginx/nginx.repo
+      dest: /etc/yum.repos.d/nginx.repo
+      owner: root
+      group: root
+      mode: 0644
+
+  - name: Ensure Nginx is installed
+    yum: name=nginx state=present
+
+  - name: push nginx.conf
+    copy:
+      src: nginx/nginx.conf
+      dest: /etc/nginx/nginx.conf
+      owner: root
+      group: root
+      mode: 0644
+  
+  - name: Start Nginx
+    service: name=nginx enabled=yes state=started
+
+  
+
+
+#
+- hosts: webservers:lbservers
+  sudo: yes
+  
+  tasks:
+  - name: Stop Iptables
+    service: name=iptables state=stopped

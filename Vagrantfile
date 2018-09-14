@@ -1,11 +1,5 @@
 #Vagrant config file(Vagrantfile)
 Vagrant.configure("2") do |config|
-  
-  config.vm.define "acs" do |acs|
-    acs.vm.box = "ubuntu/trusty64"
-    acs.vm.hostname = "acs"
-    acs.vm.network "private_network", ip: "192.168.33.10"
-  end
 
   config.vm.define "lb1" do |lb1|
     lb1.vm.box = "nrel/CentOS-6.5-x86_64"
@@ -26,6 +20,14 @@ Vagrant.configure("2") do |config|
     web02.vm.network "private_network", ip: "192.168.33.51"
     web02.vm.network "forwarded_port", guest: 80, host: 8081
   end
-
-
+  #
+  # Run Ansible from the Vagrant Host
+  #
+  config.vm.provision "ansible" do |ansible|
+    ansible.playbook = "playbooks/web_lb.yml"
+    ansible.groups = { 
+      "webservers" => ["web01", "web02"],
+      "lbservers" => ["lb1"]
+    }
+  end
 end

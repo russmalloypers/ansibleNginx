@@ -7,36 +7,21 @@
   - name: Ensure Apache is installed
     yum: name=httpd state=present
   
-#
-- hosts: web01
-  sudo: yes
 
-  tasks:
-  - name: push index.html file for web01
+  - name: push index.html file
     copy:
-      src: web01/index.html
-      dest: /var/www/html/index.html
-      owner: apache
-      group: apache
-      mode: 0644
-#
-- hosts: web02
-  sudo: yes
-
-  tasks:
-  - name: push index.html file for web02
-    copy:
-      src: web02/index.html
+      src: index.html
       dest: /var/www/html/index.html
       owner: apache
       group: apache
       mode: 0644
 
-#
-- hosts: webservers
-  sudo: yes
+  - name: replace hostname variable
+    replace:
+      path: /var/www/html/index.html
+      regexp: XXXXX
+      replace: "{{ inventory_hostname }}"
 
-  tasks:
   - name: Start Apache services
     service: name=httpd enabled=yes state=started
 
